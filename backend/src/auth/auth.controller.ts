@@ -2,6 +2,7 @@ import {
     Body,
     Controller,
     Get,
+    Patch,
     Post,
     Req,
     UseGuards,
@@ -10,8 +11,10 @@ import {
 import { Role } from '../generated/prisma/client';
 
 import { AuthService } from './auth.service';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { CurrentUser } from './current-user.decorator';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { Roles } from './roles.decorator';
@@ -36,6 +39,18 @@ export class AuthController {
         return {
             user: request.user,
         };
+    }
+
+    @Patch('change-password')
+    @UseGuards(JwtAuthGuard)
+    changePassword(
+        @CurrentUser() user: { sub: number },
+        @Body() changePasswordDto: ChangePasswordDto,
+    ) {
+        return this.authService.changePassword(
+            user.sub,
+            changePasswordDto,
+        );
     }
 
     @Get('admin-test')

@@ -1,4 +1,5 @@
 import {
+    BadRequestException,
     ConflictException,
     Injectable,
     UnauthorizedException,
@@ -11,6 +12,7 @@ import { Role } from '../generated/prisma/client';
 
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -92,6 +94,64 @@ export class AuthService {
                 address: user.address,
                 role: user.role,
             },
+        };
+    }
+
+    async changePassword(
+        userId: number,
+        changePasswordDto: ChangePasswordDto,
+    ) {
+        const user = await this.prisma.user.findUnique({
+            where: {
+                id: userId,
+            },
+        });
+
+        if (!user) {
+            throw new UnauthorizedException(
+                'User not found',
+            );
+        }
+
+        const passwordMatches = await bcrypt.compare(
+            changePasswordDto.currentPassword,
+            user.password,
+        );
+
+        if (!passwordMatches) {
+            throw new BadRequestException(
+                'Current password is incorrect',
+            );
+        }
+
+        const newPasswordMatchesCurrent =
+            await bcrypt.compare(
+                changePasswordDto.newPassword,
+                user.password,
+            );
+
+        if (newPasswordMatchesCurrent) {
+            throw new BadRequestException(
+                'New password must be different from the current password',
+            );
+        }
+
+        const hashedPassword = await bcrypt.hash(
+            changePasswordDto.newPassword,
+            12,
+        );
+
+        await this.prisma.user.update({
+            where: {
+                id: userId,
+            },
+            data: {
+                password: hashedPassword,
+            },
+        });
+
+        return {
+            message: 'Password changed successfully',
         };
     }
 }
