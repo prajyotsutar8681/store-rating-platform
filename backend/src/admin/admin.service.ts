@@ -149,6 +149,9 @@ export class AdminService {
     async getUsers(query: ListUsersDto) {
         const {
             search,
+            name,
+            email,
+            address,
             role,
             sortBy = 'createdAt',
             sortOrder = 'desc',
@@ -182,6 +185,33 @@ export class AdminService {
                 }
                 : {}),
 
+            ...(name
+                ? {
+                    name: {
+                        contains: name,
+                        mode: 'insensitive' as const,
+                    },
+                }
+                : {}),
+
+            ...(email
+                ? {
+                    email: {
+                        contains: email,
+                        mode: 'insensitive' as const,
+                    },
+                }
+                : {}),
+
+            ...(address
+                ? {
+                    address: {
+                        contains: address,
+                        mode: 'insensitive' as const,
+                    },
+                }
+                : {}),
+
             ...(role ? { role } : {}),
         };
 
@@ -199,7 +229,8 @@ export class AdminService {
             ? sortBy
             : 'createdAt';
 
-        const safeSortOrder = sortOrder === 'asc' ? 'asc' : 'desc';
+        const safeSortOrder =
+            sortOrder === 'asc' ? 'asc' : 'desc';
 
         const skip = (page - 1) * limit;
 

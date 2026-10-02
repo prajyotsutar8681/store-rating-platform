@@ -1,12 +1,30 @@
-import { IsEnum, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
-import { Type } from 'class-transformer';
+import {
+    IsEnum,
+    IsOptional,
+    IsString,
+    Max,
+    Min,
+} from 'class-validator';
 
+import { Type } from 'class-transformer';
 import { Role } from '../../generated/prisma/client';
 
 export class ListUsersDto {
     @IsOptional()
     @IsString()
     search?: string;
+
+    @IsOptional()
+    @IsString()
+    name?: string;
+
+    @IsOptional()
+    @IsString()
+    email?: string;
+
+    @IsOptional()
+    @IsString()
+    address?: string;
 
     @IsOptional()
     @IsEnum(Role)
@@ -22,13 +40,11 @@ export class ListUsersDto {
 
     @IsOptional()
     @Type(() => Number)
-    @IsInt()
     @Min(1)
     page?: number = 1;
 
     @IsOptional()
     @Type(() => Number)
-    @IsInt()
     @Min(1)
     @Max(100)
     limit?: number = 10;

@@ -2,8 +2,10 @@ import {
     Controller,
     Get,
     UseGuards,
+    Query,
 } from '@nestjs/common';
 
+import { ListOwnerRatingsDto } from './dto/list-owner-ratings.dto';
 import { Role } from '../generated/prisma/client';
 
 import { CurrentUser } from '../auth/current-user.decorator';
@@ -24,9 +26,11 @@ export class OwnerController {
     @Get('dashboard')
     getDashboard(
         @CurrentUser() user: { sub: number },
+        @Query() query: ListOwnerRatingsDto,
     ) {
         return this.ownerService.getDashboard(
             user.sub,
+            query,
         );
     }
 }
