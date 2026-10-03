@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
     ArrowLeft,
+    ArrowUpDown,
     Building2,
     KeyRound,
     LogOut,
@@ -39,6 +40,10 @@ type OwnerDashboardData = {
     ratings: StoreRating[];
 };
 
+type SortField = 'name' | 'email' | 'address' | 'rating' | 'ratedAt';
+
+type SortDirection = 'asc' | 'desc';
+
 export default function OwnerDashboard() {
     const navigate = useNavigate();
     const { user, logout } = useAuth();
@@ -49,15 +54,17 @@ export default function OwnerDashboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
+    const [sortField, setSortField] = useState<SortField>('ratedAt');
+    const [sortDirection, setSortDirection] =
+        useState<SortDirection>('desc');
+
     useEffect(() => {
         const loadDashboard = async () => {
             try {
                 setLoading(true);
                 setError('');
 
-                const response = await api.get(
-                    '/owner/dashboard',
-                );
+                const response = await api.get('/owner/dashboard');
 
                 setDashboard(response.data);
             } catch (err: any) {
@@ -81,6 +88,69 @@ export default function OwnerDashboard() {
     const handleLogout = () => {
         logout();
         navigate('/login');
+    };
+
+    const handleSort = (field: SortField) => {
+        if (sortField === field) {
+            setSortDirection((current) =>
+                current === 'asc' ? 'desc' : 'asc',
+            );
+        } else {
+            setSortField(field);
+            setSortDirection('asc');
+        }
+    };
+
+    const sortedRatings = useMemo(() => {
+        if (!dashboard) {
+            return [];
+        }
+
+        return [...dashboard.ratings].sort((a, b) => {
+            let comparison = 0;
+
+            switch (sortField) {
+                case 'name':
+                    comparison = a.user.name.localeCompare(b.user.name);
+                    break;
+
+                case 'email':
+                    comparison = a.user.email.localeCompare(b.user.email);
+                    break;
+
+                case 'address':
+                    comparison = a.user.address.localeCompare(
+                        b.user.address,
+                    );
+                    break;
+
+                case 'rating':
+                    comparison = a.rating - b.rating;
+                    break;
+
+                case 'ratedAt':
+                    comparison =
+                        new Date(a.ratedAt).getTime() -
+                        new Date(b.ratedAt).getTime();
+                    break;
+            }
+
+            return sortDirection === 'asc'
+                ? comparison
+                : -comparison;
+        });
+    }, [dashboard, sortField, sortDirection]);
+
+    const getSortIcon = (field: SortField) => {
+        if (sortField !== field) {
+            return <ArrowUpDown size={15} />;
+        }
+
+        return (
+            <span className="text-xs">
+                {sortDirection === 'asc' ? '↑' : '↓'}
+            </span>
+        );
     };
 
     return (
@@ -198,6 +268,7 @@ export default function OwnerDashboard() {
                                                     2,
                                                 )}
                                             </span>
+
                                             <span className="text-slate-500">
                                                 / 5
                                             </span>
@@ -251,29 +322,94 @@ export default function OwnerDashboard() {
                                             <thead className="border-b border-[#E3E7EE] bg-[#F8F9FB]">
                                                 <tr>
                                                     <th className="px-5 py-4 text-sm font-semibold text-[#3157D5]">
-                                                        User
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                handleSort(
+                                                                    'name',
+                                                                )
+                                                            }
+                                                            className="flex items-center gap-2 hover:text-[#2849B8]"
+                                                        >
+                                                            User
+                                                            {getSortIcon(
+                                                                'name',
+                                                            )}
+                                                        </button>
                                                     </th>
 
                                                     <th className="px-5 py-4 text-sm font-semibold text-[#3157D5]">
-                                                        Email
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                handleSort(
+                                                                    'email',
+                                                                )
+                                                            }
+                                                            className="flex items-center gap-2 hover:text-[#2849B8]"
+                                                        >
+                                                            Email
+                                                            {getSortIcon(
+                                                                'email',
+                                                            )}
+                                                        </button>
                                                     </th>
 
                                                     <th className="px-5 py-4 text-sm font-semibold text-[#3157D5]">
-                                                        Address
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                handleSort(
+                                                                    'address',
+                                                                )
+                                                            }
+                                                            className="flex items-center gap-2 hover:text-[#2849B8]"
+                                                        >
+                                                            Address
+                                                            {getSortIcon(
+                                                                'address',
+                                                            )}
+                                                        </button>
                                                     </th>
 
                                                     <th className="px-5 py-4 text-sm font-semibold text-[#3157D5]">
-                                                        Rating
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                handleSort(
+                                                                    'rating',
+                                                                )
+                                                            }
+                                                            className="flex items-center gap-2 hover:text-[#2849B8]"
+                                                        >
+                                                            Rating
+                                                            {getSortIcon(
+                                                                'rating',
+                                                            )}
+                                                        </button>
                                                     </th>
 
                                                     <th className="px-5 py-4 text-sm font-semibold text-[#3157D5]">
-                                                        Rated On
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                handleSort(
+                                                                    'ratedAt',
+                                                                )
+                                                            }
+                                                            className="flex items-center gap-2 hover:text-[#2849B8]"
+                                                        >
+                                                            Rated On
+                                                            {getSortIcon(
+                                                                'ratedAt',
+                                                            )}
+                                                        </button>
                                                     </th>
                                                 </tr>
                                             </thead>
 
                                             <tbody className="divide-y divide-[#EEF1F5]">
-                                                {dashboard.ratings.map(
+                                                {sortedRatings.map(
                                                     (item) => (
                                                         <tr
                                                             key={
@@ -283,24 +419,21 @@ export default function OwnerDashboard() {
                                                         >
                                                             <td className="px-5 py-4 text-sm font-medium text-slate-900">
                                                                 {
-                                                                    item
-                                                                        .user
+                                                                    item.user
                                                                         .name
                                                                 }
                                                             </td>
 
                                                             <td className="px-5 py-4 text-sm text-slate-600">
                                                                 {
-                                                                    item
-                                                                        .user
+                                                                    item.user
                                                                         .email
                                                                 }
                                                             </td>
 
                                                             <td className="px-5 py-4 text-sm text-slate-600">
                                                                 {
-                                                                    item
-                                                                        .user
+                                                                    item.user
                                                                         .address
                                                                 }
                                                             </td>
@@ -319,6 +452,7 @@ export default function OwnerDashboard() {
                                                                             item.rating
                                                                         }
                                                                     </span>
+
                                                                     <span className="text-sm text-slate-500">
                                                                         /5
                                                                     </span>
