@@ -27,6 +27,24 @@ export default function ChangePassword() {
             return;
         }
 
+        if (
+            newPassword.length < 8 ||
+            newPassword.length > 16
+        ) {
+            setError('Password must be between 8 and 16 characters.');
+            return;
+        }
+
+        if (
+            !/[A-Z]/.test(newPassword) ||
+            !/[^A-Za-z0-9]/.test(newPassword)
+        ) {
+            setError(
+                'New password must contain at least one uppercase letter and one special character.',
+            );
+            return;
+        }
+
         try {
             setLoading(true);
 
