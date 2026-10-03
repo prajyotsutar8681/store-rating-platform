@@ -1,75 +1,236 @@
-# React + TypeScript + Vite
+# Store Rating Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A full-stack web application that allows users to discover registered stores and submit ratings from 1 to 5. The platform provides role-based functionality for System Administrators, Normal Users, and Store Owners.
 
-Currently, two official plugins are available:
+The application is built using React, NestJS, PostgreSQL, Prisma ORM, and JWT-based authentication.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## Live Application
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Frontend
 
-## Expanding the ESLint configuration
+https://store-rating-platform-lake.vercel.app/
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Backend API
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+https://store-rating-platform-hpzy.onrender.com/
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+---
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Tech Stack
 
-```
+### Frontend
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- React Router
+- Axios
+- Lucide React
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Backend
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- NestJS
+- TypeScript
+- JWT Authentication
+- bcrypt
+- class-validator
+- class-transformer
 
-```
+### Database
+
+- PostgreSQL
+- Prisma ORM
+
+### Deployment
+
+- Vercel — Frontend
+- Render — Backend
+- Render PostgreSQL — Production Database
+
+---
+
+## Features
+
+### Role-Based Authentication
+
+The application uses a single login system with three roles:
+
+- System Administrator
+- Normal User
+- Store Owner
+
+Access to application functionality is controlled based on the authenticated user's role.
+
+---
+
+## System Administrator
+
+Administrators can:
+
+- View a dashboard with:
+  - Total users
+  - Total stores
+  - Total submitted ratings
+- Add normal users
+- Add admin users
+- Add store owners
+- Add stores
+- View users
+- View stores
+- Search and filter users
+- Search stores
+- Sort users and stores
+- View individual user details
+- View store owner information and store rating
+- Log out
+
+---
+
+## Normal User
+
+Normal users can:
+
+- Register through the signup page
+- Log in
+- View registered stores
+- Search stores by name
+- Search stores by address
+- View overall store ratings
+- View their submitted rating
+- Submit a rating from 1 to 5
+- Modify their submitted rating
+- Change their password
+- Log out
+
+Each user can have only one rating for a particular store. Existing ratings can be modified.
+
+---
+
+## Store Owner
+
+Store owners can:
+
+- Log in
+- View their store dashboard
+- View the average rating of their store
+- View the total number of ratings
+- View users who submitted ratings
+- View rating details
+- Sort rating information
+- Change their password
+- Log out
+
+---
+
+## Validation
+
+The application implements the validation rules specified in the challenge:
+
+| Field | Validation |
+|---|---|
+| Name | Minimum 20 characters |
+| Name | Maximum 60 characters |
+| Address | Maximum 400 characters |
+| Password | 8–16 characters |
+| Password | At least one uppercase letter |
+| Password | At least one special character |
+| Email | Standard email validation |
+| Rating | Integer from 1 to 5 |
+
+Validation is applied on the backend using NestJS validation pipes and DTOs.
+
+---
+
+## Sorting and Search
+
+The application supports sorting in ascending and descending order for relevant fields.
+
+### Administrator
+
+Users can be sorted by:
+
+- Name
+- Email
+- Address
+- Role
+- Created date
+
+Stores can be sorted by:
+
+- Name
+- Email
+- Address
+- Rating
+- Created date
+
+### Normal User
+
+Stores can be sorted by:
+
+- Store name
+- Address
+- Rating
+
+Stores can also be searched by:
+
+- Store name
+- Address
+
+### Store Owner
+
+Rating records can be sorted by:
+
+- User name
+- Email
+- Address
+- Rating
+- Rated date
+
+---
+
+## Project Structure
+
+```text
+store-rating-platform/
+│
+├── backend/
+│   ├── prisma/
+│   │   ├── migrations/
+│   │   ├── schema.prisma
+│   │   └── seed.ts
+│   │
+│   ├── src/
+│   │   ├── auth/
+│   │   ├── admin/
+│   │   ├── owner/
+│   │   ├── ratings/
+│   │   ├── stores/
+│   │   ├── prisma/
+│   │   ├── generated/
+│   │   ├── app.module.ts
+│   │   └── main.ts
+│   │
+│   ├── .env.example
+│   ├── package.json
+│   └── prisma7.config.ts
+│
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── context/
+│   │   ├── pages/
+│   │   ├── routes/
+│   │   ├── services/
+│   │   ├── App.tsx
+│   │   └── main.tsx
+│   │
+│   ├── .env.example
+│   ├── package.json
+│   ├── vite.config.ts
+│   └── vercel.json
+│
+├── .gitignore
+└── README.md
